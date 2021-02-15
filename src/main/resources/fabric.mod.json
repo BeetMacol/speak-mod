@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+
+  "id": "speak-mod",
+  "version": "${version}",
+  "name": "Speak",
+  "description": "Adds a simple Voice Chat system.",
+  "authors": [
+    "BeetMacol"
+  ],
+  "contact": {
+    "sources": "https://github.com/BeetMacol/speak-mod"
+  },
+  "license": "MIT",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.beetmacol.speakmod.SpeakMod::init"
+    ],
+    "client": [
+      "com.beetmacol.speakmod.SpeakMod::clientInit"
+    ],
+    "server": [
+      "com.beetmacol.speakmod.SpeakMod::serverInit"
+    ]
+  },
+  "mixins": [
+    "speak-mod.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.16.x",
+    "fabricloader": ">=0.7.4",
+    "fabric": "*"
+  }
+}
