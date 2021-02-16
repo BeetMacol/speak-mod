@@ -22,7 +22,7 @@
       "com.beetmacol.speakmod.SpeakModClient"
     ],
     "server": [
-      "com.beetmacol.speakmod.SpeakMod::initializeServer"
+      "com.beetmacol.speakmod.SpeakModServer"
     ]
   },
   "mixins": [

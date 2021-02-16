@@ -1,8 +1,5 @@
 package com.beetmacol.speakmod;
 
-import com.beetmacol.speakmod.networking.SpeakModServerNetworking;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.gamerule.v1.CustomGameRuleCategory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
@@ -28,10 +25,5 @@ public class SpeakMod {
 
 	public static void initialize() {
 		LOGGER.debug("Speak Mod initialized.");
-	}
-
-	@Environment(EnvType.SERVER)
-	public static void initializeServer() {
-		SpeakModServerNetworking.initialize();
 	}
 }

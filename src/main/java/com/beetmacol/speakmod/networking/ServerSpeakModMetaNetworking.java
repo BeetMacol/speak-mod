@@ -1,6 +1,7 @@
 package com.beetmacol.speakmod.networking;
 
 import com.beetmacol.speakmod.SpeakMod;
+import com.beetmacol.speakmod.SpeakModServer;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,12 +19,12 @@ import static com.beetmacol.speakmod.SpeakMod.HANDSHAKE_CHANNEL;
 import static com.beetmacol.speakmod.SpeakMod.PROTOCOL_VERSION;
 
 @Environment(EnvType.SERVER)
-public class SpeakModServerNetworking {
+public class ServerSpeakModMetaNetworking {
 	public static final Logger LOGGER = LogManager.getLogger("Speak Mod Networking");
 
 	public static void initialize() {
 		ServerPlayConnectionEvents.JOIN.register((serverPlayNetworkHandler, packetSender, minecraftServer) -> playerJoin(serverPlayNetworkHandler));
-		ServerPlayNetworking.registerGlobalReceiver(HANDSHAKE_CHANNEL, SpeakModServerNetworking::handleChannelPayload);
+		ServerPlayNetworking.registerGlobalReceiver(HANDSHAKE_CHANNEL, ServerSpeakModMetaNetworking::handleChannelPayload);
 	}
 
 	private static void handleChannelPayload(MinecraftServer minecraftServer, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler networkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
@@ -37,6 +38,8 @@ public class SpeakModServerNetworking {
 	}
 
 	private static void playerJoin(ServerPlayNetworkHandler networkHandler) {
-		ServerPlayNetworking.send(networkHandler.player, HANDSHAKE_CHANNEL, new PacketByteBuf(Unpooled.buffer()).writeVarInt(PROTOCOL_VERSION).writeString(SpeakMod.VERSION));
+		PacketByteBuf packetByteBuf = new PacketByteBuf(Unpooled.buffer()).writeVarInt(PROTOCOL_VERSION).writeString(SpeakMod.VERSION);
+		packetByteBuf.writeShort(SpeakModServer.getPort());
+		ServerPlayNetworking.send(networkHandler.player, HANDSHAKE_CHANNEL, packetByteBuf);
 	}
 }
