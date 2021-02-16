@@ -2,7 +2,7 @@
   "key.speak-mod.speak": "Speak On Voice Chat",
   "gamerule.category.voice_chat": "Voice Chat",
   "gamerule.requireSpeakMod": "Require Speak Mod",
-  "gamerule.requireSpeakMod.description": "Players that try to join the server without Speak Mod will be kicked if true.",
+  "gamerule.requireSpeakMod.description": "Players that try to join the server without Speak Mod (with a matching protocol version) will be kicked if true.",
   "gamerule.voiceChatRange": "Voice chat range",
   "gamerule.voiceChatRange.description": "The longest distance other players can hear the speaker from.",
   "gamerule.scaleVoiceVelocity": "Distance dependent voice velocity",

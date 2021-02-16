@@ -17,7 +17,7 @@ public class SpeachIndicatorRenderer implements HudRenderCallback {
 	@Override
 	public void onHudRender(MatrixStack matrices, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		if (SpeakMod.keyBinding.isPressed()) {
+		if (SpeakModClient.keyBinding.isPressed()/* && (!client.isInSingleplayer() || client.player.networkHandler.getPlayerList().size() > 1)*/) {
 			int scaledWidth = client.getWindow().getScaledWidth();
 			int scaledHeight = client.getWindow().getScaledHeight();
 			int x = scaledWidth / 2 - 8;
@@ -30,7 +30,7 @@ public class SpeachIndicatorRenderer implements HudRenderCallback {
 				timer -= 7.5f;
 			}
 
-			client.getTextureManager().bindTexture(SpeakMod.SPEACH_INDICATOR_TEXTURE);
+			client.getTextureManager().bindTexture(SpeakModClient.SPEACH_INDICATOR_TEXTURE);
 			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 			DrawableHelper.drawTexture(matrices, x, y, 0, frame * 16, 16, 16, 16, 80);
 		}

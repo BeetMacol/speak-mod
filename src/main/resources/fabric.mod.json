@@ -16,13 +16,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.beetmacol.speakmod.SpeakMod::init"
+      "com.beetmacol.speakmod.SpeakMod::initialize"
     ],
     "client": [
-      "com.beetmacol.speakmod.SpeakMod::clientInit"
+      "com.beetmacol.speakmod.SpeakModClient"
     ],
     "server": [
-      "com.beetmacol.speakmod.SpeakMod::serverInit"
+      "com.beetmacol.speakmod.SpeakMod::initializeServer"
     ]
   },
   "mixins": [
