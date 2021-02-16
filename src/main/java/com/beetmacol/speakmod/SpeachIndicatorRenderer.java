@@ -17,7 +17,7 @@ public class SpeachIndicatorRenderer implements HudRenderCallback {
 	@Override
 	public void onHudRender(MatrixStack matrices, float tickDelta) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		if (SpeakMod.keyBinding.isPressed() && (!client.isInSingleplayer() || client.player.networkHandler.getPlayerList().size() > 1)) {
+		if (SpeakMod.keyBinding.isPressed()) {
 			int scaledWidth = client.getWindow().getScaledWidth();
 			int scaledHeight = client.getWindow().getScaledHeight();
 			int x = scaledWidth / 2 - 8;

@@ -1,3 +1,10 @@
 {
-  "key.speak-mod.speak": "Speak On Voice Chat"
+  "key.speak-mod.speak": "Speak On Voice Chat",
+  "gamerule.category.voice_chat": "Voice Chat",
+  "gamerule.requireSpeakMod": "Require Speak Mod",
+  "gamerule.requireSpeakMod.description": "Players that try to join the server without Speak Mod will be kicked if true.",
+  "gamerule.voiceChatRange": "Voice chat range",
+  "gamerule.voiceChatRange.description": "The longest distance other players can hear the speaker from.",
+  "gamerule.scaleVoiceVelocity": "Distance dependent voice velocity",
+  "gamerule.scaleVoiceVelocity.description": "The further the player is from speaker the lower the speaker's volume gets. On the furthest possible distance the volume is exactly 0% and if the players are on the same coordinates the volume is 100%."
 }
