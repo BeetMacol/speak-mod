@@ -23,6 +23,7 @@ public class SpeakModServer implements DedicatedServerModInitializer {
 				SpeakMod.LOGGER.error("Could not start voice chat server.", exception);
 			}
 		});
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> voiceChatServer.terminate());
 	}
 
 	@Environment(EnvType.SERVER)

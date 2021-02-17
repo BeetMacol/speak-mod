@@ -55,6 +55,6 @@ public class ServerSpeakModMetaNetworking {
 	}
 
 	private static void playerLeave(ServerPlayNetworkHandler networkHandler) {
-		SpeakModServer.voiceChatServer.removeUdpAwaitedPlayer(networkHandler.player);
+		SpeakModServer.voiceChatServer.removePlayer(networkHandler.player);
 	}
 }

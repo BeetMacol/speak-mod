@@ -62,11 +62,25 @@ public class VoiceChatServer {
 					}
 					case 0x01: {
 						ServerPlayerEntity speakingPlayer = clients.get(packet.getSocketAddress());
-						// Sound packets
+						for (Map.Entry<SocketAddress, ServerPlayerEntity> client : clients.entrySet()) {
+							ServerPlayerEntity player = client.getValue();
+							SocketAddress playerSocketAddress = client.getKey();
+							byte[] clientboundData = packet.getData();
+							clientboundData[0] = 0x00;
+							if (player != speakingPlayer && player.getPos().isInRange(speakingPlayer.getPos(), SpeakMod.getVoiceChatRange()) && player.getServerWorld() == speakingPlayer.getServerWorld()) {
+								/* TODO Sound volume changing
+								if (SpeakMod.isScaleVoiceVolume()) {
+									double volume = 1 - player.getPos().distanceTo(speakingPlayer.getPos()) / SpeakMod.getVoiceChatRange();
+								}*/
+								DatagramPacket clientboundPacket = new DatagramPacket(clientboundData, clientboundData.length, playerSocketAddress);
+								socket.send(clientboundPacket);
+							}
+						}
 						break;
 					}
 				}
-			} catch (IOException ignored) {
+			} catch (IOException exception) {
+				exception.printStackTrace();
 			}
 		}
 	}
@@ -75,11 +89,17 @@ public class VoiceChatServer {
 		unconfirmedPlayers.put(auth, player);
 	}
 
-	public void removeUdpAwaitedPlayer(ServerPlayerEntity checked) {
+	public void removePlayer(ServerPlayerEntity checked) {
 		for (Map.Entry<Long, ServerPlayerEntity> player : unconfirmedPlayers.entrySet()) {
 			if (player.getValue() == checked) {
 				unconfirmedPlayers.remove(player.getKey());
-				break;
+				return;
+			}
+		}
+		for (Map.Entry<SocketAddress, ServerPlayerEntity> player : clients.entrySet()) {
+			if (player.getValue() == checked) {
+				clients.remove(player.getKey());
+				return;
 			}
 		}
 	}

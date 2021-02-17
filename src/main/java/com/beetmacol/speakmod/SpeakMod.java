@@ -19,11 +19,27 @@ public class SpeakMod {
 	public static final int PROTOCOL_VERSION = 0;
 
 	public static final CustomGameRuleCategory VOICE_CHAT_GAME_RULE_CATEGORY = new CustomGameRuleCategory(new Identifier(ID, "voice_chat"), new TranslatableText("gamerule.category.voice_chat").styled(style -> style.withBold(true).withColor(Formatting.YELLOW)));
-	public static final GameRules.Key<GameRules.BooleanRule> REQUIRE_SPEAK_MOD_GAME_RULE = GameRuleRegistry.register("requireSpeakMod", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(false));
-	public static final GameRules.Key<DoubleRule> VOICE_CHAT_RANGE_GAME_RULE = GameRuleRegistry.register("voiceChatRange", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createDoubleRule(20d, 0d));
-	public static final GameRules.Key<GameRules.BooleanRule> SCALE_VOICE_VELOCITY_GAME_RULE = GameRuleRegistry.register("scaleVoiceVelocity", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(true));
+	public static final GameRules.Key<GameRules.BooleanRule> REQUIRE_SPEAK_MOD_GAME_RULE = GameRuleRegistry.register("requireSpeakMod", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(false, (server, rule) -> requireSpeakMod = rule.get()));
+	public static final GameRules.Key<DoubleRule> VOICE_CHAT_RANGE_GAME_RULE = GameRuleRegistry.register("voiceChatRange", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createDoubleRule(20d, 0d, (server, rule) -> voiceChatRange = rule.get()));
+	public static final GameRules.Key<GameRules.BooleanRule> SCALE_VOICE_VOLUME_GAME_RULE = GameRuleRegistry.register("scaleVoiceVolume", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(true, (server, rule) -> scaleVoiceVolume = rule.get()));
+
+	private static boolean requireSpeakMod = false;
+	private static double voiceChatRange = 20d;
+	private static boolean scaleVoiceVolume = true;
 
 	public static void initialize() {
 		LOGGER.debug("Speak Mod initialized.");
+	}
+
+	public static boolean isRequireSpeakMod() {
+		return requireSpeakMod;
+	}
+
+	public static double getVoiceChatRange() {
+		return voiceChatRange;
+	}
+
+	public static boolean isScaleVoiceVolume() {
+		return scaleVoiceVolume;
 	}
 }
