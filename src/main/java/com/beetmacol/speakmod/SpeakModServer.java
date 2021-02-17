@@ -5,6 +5,9 @@ import com.beetmacol.speakmod.networking.VoiceChatServer;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+
+import java.net.SocketException;
 
 @Environment(EnvType.SERVER)
 public class SpeakModServer implements DedicatedServerModInitializer {
@@ -13,11 +16,17 @@ public class SpeakModServer implements DedicatedServerModInitializer {
 	@Override
 	public void onInitializeServer() {
 		ServerSpeakModMetaNetworking.initialize();
-		voiceChatServer = new VoiceChatServer();
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+			try {
+				voiceChatServer = new VoiceChatServer(server);
+			} catch (SocketException exception) {
+				SpeakMod.LOGGER.error("Could not start voice chat server.", exception);
+			}
+		});
 	}
 
 	@Environment(EnvType.SERVER)
-	public static int getPort() {
+	public static int getVoiceServerPort() {
 		// TODO add the port to `server.properties` somehow
 		return 25566;
 	}

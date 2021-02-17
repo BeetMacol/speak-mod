@@ -15,7 +15,7 @@ public class SpeakMod {
 	public static final String ID = "speak-mod";
 	public static final String VERSION = "1.0.0";
 	public static final Logger LOGGER = LogManager.getLogger("Speak Mod");
-	public static final Identifier HANDSHAKE_CHANNEL = new Identifier(ID, "meta"); // This plugin channel is used for checking if the other side has Speak Mod installed and if the version protocol is correct
+	public static final Identifier META_PLUGIN_CHANNEL = new Identifier(ID, "meta"); // This plugin channel is used for checking if the other side has Speak Mod installed and if the version protocol is correct
 	public static final int PROTOCOL_VERSION = 0;
 
 	public static final CustomGameRuleCategory VOICE_CHAT_GAME_RULE_CATEGORY = new CustomGameRuleCategory(new Identifier(ID, "voice_chat"), new TranslatableText("gamerule.category.voice_chat").styled(style -> style.withBold(true).withColor(Formatting.YELLOW)));
