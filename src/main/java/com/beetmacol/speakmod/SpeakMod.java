@@ -17,6 +17,9 @@ public class SpeakMod {
 	public static final Logger LOGGER = LogManager.getLogger("Speak Mod");
 	public static final Identifier META_PLUGIN_CHANNEL = new Identifier(ID, "meta"); // This plugin channel is used for checking if the other side has Speak Mod installed and if the version protocol is correct
 	public static final int PROTOCOL_VERSION = 0;
+	public static final int AUDIO_FRAME_SIZE = 4;
+	public static final int AUDIO_BUFFER_SIZE = 1024 * AUDIO_FRAME_SIZE;
+	public static final int UDP_PACKET_SIZE = AUDIO_BUFFER_SIZE + 1;
 
 	public static final CustomGameRuleCategory VOICE_CHAT_GAME_RULE_CATEGORY = new CustomGameRuleCategory(new Identifier(ID, "voice_chat"), new TranslatableText("gamerule.category.voice_chat").styled(style -> style.withBold(true).withColor(Formatting.YELLOW)));
 	public static final GameRules.Key<GameRules.BooleanRule> REQUIRE_SPEAK_MOD_GAME_RULE = GameRuleRegistry.register("requireSpeakMod", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(false, (server, rule) -> requireSpeakMod = rule.get()));

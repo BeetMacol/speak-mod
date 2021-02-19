@@ -38,10 +38,10 @@ public class VoiceChatClient {
 		this.serverSocketAddress = new InetSocketAddress(address, port);
 		//this.socket = new DatagramSocket(serverSocket.getLocalSocketAddress());
 
-		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, false);
+		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, SpeakMod.AUDIO_FRAME_SIZE, 44100, false);
 		DataLine.Info outputInfo = new DataLine.Info(SourceDataLine.class, format);
 		this.outputTest = (SourceDataLine) AudioSystem.getLine(outputInfo);
-		this.outputTest.open(format, 4096);
+		this.outputTest.open(format, SpeakMod.AUDIO_BUFFER_SIZE);
 
 		this.udpListeningThread = new Thread(this::listen, "Voice Chat Packet Lister");
 		this.udpListeningThread.start();
@@ -49,41 +49,45 @@ public class VoiceChatClient {
 
 	public void terminate() {
 		audioInput.terminate();
+		serverSocket.close();
 		udpListeningThread.interrupt();
 	}
 
 	private void listen() {
-		byte[] data = new byte[4096];
-		DatagramPacket packet = new DatagramPacket(data, data.length);
+		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
+		DatagramPacket packet = new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE);
 		outputTest.start();
+		SpeakMod.LOGGER.info("Listening for voice packets from server.");
 		while (!Thread.interrupted()) {
 			try {
-				SpeakMod.LOGGER.info("Listening for voice packets from server.");
+				data.position(0);
 				serverSocket.receive(packet);
-				if (packet.getData()[0] == 0x00) {
-					outputTest.write(packet.getData(), 0, packet.getLength());
+				data.get();
+				if (data.array()[0] == 0) {
+					byte[] audio = new byte[SpeakMod.AUDIO_BUFFER_SIZE];
+					data.get(audio);
+					outputTest.write(audio, 0, SpeakMod.AUDIO_BUFFER_SIZE);
 				}
 			} catch (IOException ignored) {
+			} catch (Exception exception) {
+				SpeakMod.LOGGER.error("Unexpected error while reading an audio packet.", exception);
 			}
 		}
 	}
 
 	public void sendConnectionInitPacket(long auth) throws IOException {
-		byte[] data = new byte[4096];
-		data[0] = 0x00;
-		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-		buffer.putLong(auth);
-		for (int i = 0; i < Long.BYTES; i++) {
-			data[i+1] = buffer.get(i);
-		}
-		DatagramPacket packet = new DatagramPacket(data, data.length, serverSocketAddress);
-		serverSocket.send(packet);
+		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
+		data.put((byte) 0x00);
+		data.putLong(auth);
+		SpeakMod.LOGGER.info("Auth: {}, Data: {}", auth, data.array());
+		serverSocket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, serverSocketAddress));
 	}
 
 	public void sendVoicePacket(byte[] audio) throws IOException {
-		audio[0] = 0x01;
-		DatagramPacket packet = new DatagramPacket(audio, audio.length, serverSocketAddress);
-		serverSocket.send(packet);
+		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
+		data.put((byte) 0x01);
+		data.put(audio);
+		serverSocket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, serverSocketAddress));
 	}
 
 	public int getVoiceServerPort() {

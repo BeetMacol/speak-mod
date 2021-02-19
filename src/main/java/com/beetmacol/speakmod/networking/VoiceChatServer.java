@@ -39,20 +39,17 @@ public class VoiceChatServer {
 	}
 
 	private void listen() {
-		byte[] data = new byte[4096];
-		DatagramPacket packet = new DatagramPacket(data, data.length);
+		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
+		DatagramPacket packet = new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE);
 		while (!Thread.interrupted()) {
 			try {
+				data.position(0);
 				socket.receive(packet);
-				switch (packet.getData()[0]) {
+				data.get();
+				switch (data.array()[0]) {
 					case 0x00: {
-						long auth;
-						ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-						for (int i = 0; i < Long.BYTES; i++) {
-							buffer.put(data[i+1]);
-						}
-						buffer.flip();
-						auth = buffer.getLong();
+						long auth = data.getLong();
+						SpeakMod.LOGGER.info("{}. Auth: {}, Data: {}", data.get(), auth, data.array());
 						if (unconfirmedPlayers.containsKey(auth)) {
 							ServerPlayerEntity player = unconfirmedPlayers.get(auth);
 							unconfirmedPlayers.remove(auth);
@@ -65,20 +62,19 @@ public class VoiceChatServer {
 						for (Map.Entry<SocketAddress, ServerPlayerEntity> client : clients.entrySet()) {
 							ServerPlayerEntity player = client.getValue();
 							SocketAddress playerSocketAddress = client.getKey();
-							byte[] clientboundData = packet.getData();
-							clientboundData[0] = 0x00;
-							if (player != speakingPlayer && player.getPos().isInRange(speakingPlayer.getPos(), SpeakMod.getVoiceChatRange()) && player.getServerWorld() == speakingPlayer.getServerWorld()) {
+							data.put(0, (byte) 0x00);
+							if (/*player != speakingPlayer && */player.getPos().isInRange(speakingPlayer.getPos(), SpeakMod.getVoiceChatRange()) && player.getServerWorld() == speakingPlayer.getServerWorld()) {
 								/* TODO Sound volume changing
 								if (SpeakMod.isScaleVoiceVolume()) {
 									double volume = 1 - player.getPos().distanceTo(speakingPlayer.getPos()) / SpeakMod.getVoiceChatRange();
 								}*/
-								DatagramPacket clientboundPacket = new DatagramPacket(clientboundData, clientboundData.length, playerSocketAddress);
-								socket.send(clientboundPacket);
+								socket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, playerSocketAddress));
 							}
 						}
 						break;
 					}
 				}
+			} catch (SocketException ignored) {
 			} catch (IOException exception) {
 				exception.printStackTrace();
 			}

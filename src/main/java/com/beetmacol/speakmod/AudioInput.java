@@ -13,16 +13,15 @@ import java.io.IOException;
 @Environment(EnvType.CLIENT)
 public class AudioInput {
 	private final Thread listeningThread;
-	private final int buffSize = 1024 * 4;
 
 	private final TargetDataLine input;
 
 	public AudioInput() throws LineUnavailableException {
-		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, 4, 44100, false);
+		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, SpeakMod.AUDIO_FRAME_SIZE, 44100, false);
 
 		DataLine.Info inputInfo = new DataLine.Info(TargetDataLine.class, format);
 		input = (TargetDataLine) AudioSystem.getLine(inputInfo);
-		input.open(format, buffSize);
+		input.open(format, SpeakMod.AUDIO_BUFFER_SIZE);
 
 		listeningThread = new Thread(this::listen, "Audio Input Thread");
 		listeningThread.start();
@@ -33,7 +32,7 @@ public class AudioInput {
 	}
 
 	private void listen() {
-		byte[] buff = new byte[buffSize];
+		byte[] buff = new byte[SpeakMod.AUDIO_BUFFER_SIZE];
 
 		boolean wasPressed = false;
 
