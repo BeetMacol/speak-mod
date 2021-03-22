@@ -49,7 +49,6 @@ public class VoiceChatServer {
 				switch (data.array()[0]) {
 					case 0x00: {
 						long auth = data.getLong();
-						SpeakMod.LOGGER.info("{}. Auth: {}, Data: {}", data.get(), auth, data.array());
 						if (unconfirmedPlayers.containsKey(auth)) {
 							ServerPlayerEntity player = unconfirmedPlayers.get(auth);
 							unconfirmedPlayers.remove(auth);
@@ -61,14 +60,10 @@ public class VoiceChatServer {
 						ServerPlayerEntity speakingPlayer = clients.get(packet.getSocketAddress());
 						for (Map.Entry<SocketAddress, ServerPlayerEntity> client : clients.entrySet()) {
 							ServerPlayerEntity player = client.getValue();
-							SocketAddress playerSocketAddress = client.getKey();
-							data.put(0, (byte) 0x00);
-							if (/*player != speakingPlayer && */player.getPos().isInRange(speakingPlayer.getPos(), SpeakMod.getVoiceChatRange()) && player.getServerWorld() == speakingPlayer.getServerWorld()) {
-								/* TODO Sound volume changing
-								if (SpeakMod.isScaleVoiceVolume()) {
-									double volume = 1 - player.getPos().distanceTo(speakingPlayer.getPos()) / SpeakMod.getVoiceChatRange();
-								}*/
-								socket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, playerSocketAddress));
+							if (player != speakingPlayer && player.getPos().isInRange(speakingPlayer.getPos(), SpeakMod.getVoiceChatRange()) && player.getServerWorld() == speakingPlayer.getServerWorld()) {
+								byte[] audio = new byte[SpeakMod.AUDIO_BUFFER_SIZE];
+								data.get(audio);
+								sendVoicePacket(speakingPlayer, audio, client.getKey());
 							}
 						}
 						break;
@@ -79,6 +74,15 @@ public class VoiceChatServer {
 				exception.printStackTrace();
 			}
 		}
+	}
+
+	public void sendVoicePacket(ServerPlayerEntity speakingPlayer, byte[] audio, SocketAddress client) throws IOException {
+		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
+		data.put((byte) 0x00);
+		data.putLong(speakingPlayer.getUuid().getMostSignificantBits());
+		data.putLong(speakingPlayer.getUuid().getLeastSignificantBits());
+		data.put(audio);
+		socket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, client));
 	}
 
 	public void addUdpAwaitedPlayer(long auth, ServerPlayerEntity player) {

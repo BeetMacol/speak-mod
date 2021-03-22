@@ -4,10 +4,12 @@ import com.beetmacol.speakmod.AudioInput;
 import com.beetmacol.speakmod.SpeakMod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
@@ -17,9 +19,13 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
+import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class VoiceChatClient {
+	private final MinecraftClient client;
+
 	//private final DatagramSocket socket;
 	private final DatagramSocket serverSocket;
 	private final SocketAddress serverSocketAddress;
@@ -32,16 +38,15 @@ public class VoiceChatClient {
 	private final SourceDataLine outputTest;
 
 	public VoiceChatClient(String address, int port) throws LineUnavailableException, SocketException {
+		this.client = MinecraftClient.getInstance();
 		this.voiceServerPort = port;
 		this.audioInput = new AudioInput();
 		this.serverSocket = new DatagramSocket();
 		this.serverSocketAddress = new InetSocketAddress(address, port);
 		//this.socket = new DatagramSocket(serverSocket.getLocalSocketAddress());
-
-		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, SpeakMod.AUDIO_FRAME_SIZE, 44100, false);
-		DataLine.Info outputInfo = new DataLine.Info(SourceDataLine.class, format);
+		DataLine.Info outputInfo = new DataLine.Info(SourceDataLine.class, SpeakMod.AUDIO_FORMAT);
 		this.outputTest = (SourceDataLine) AudioSystem.getLine(outputInfo);
-		this.outputTest.open(format, SpeakMod.AUDIO_BUFFER_SIZE);
+		this.outputTest.open(SpeakMod.AUDIO_FORMAT, SpeakMod.AUDIO_BUFFER_SIZE);
 
 		this.udpListeningThread = new Thread(this::listen, "Voice Chat Packet Lister");
 		this.udpListeningThread.start();
@@ -64,9 +69,19 @@ public class VoiceChatClient {
 				serverSocket.receive(packet);
 				data.get();
 				if (data.array()[0] == 0) {
+					PlayerEntity speakingPlayer = Objects.requireNonNull(MinecraftClient.getInstance().world).getPlayerByUuid(new UUID(data.getLong(), data.getLong()));
 					byte[] audio = new byte[SpeakMod.AUDIO_BUFFER_SIZE];
 					data.get(audio);
-					outputTest.write(audio, 0, SpeakMod.AUDIO_BUFFER_SIZE);
+					if (SpeakMod.isScaleVoiceVolume()) {
+						double volume = Objects.requireNonNull(client.player).getPos().distanceTo(Objects.requireNonNull(speakingPlayer).getPos()) / SpeakMod.getVoiceChatRange();
+						FloatControl volumeControl = (FloatControl) outputTest.getControl(FloatControl.Type.MASTER_GAIN);
+						float originalVolume = volumeControl.getValue();
+						volumeControl.setValue((float) (volume * -5)); // TODO
+						outputTest.write(audio, 0, SpeakMod.AUDIO_BUFFER_SIZE);
+						volumeControl.setValue(originalVolume);
+					} else {
+						outputTest.write(audio, 0, SpeakMod.AUDIO_BUFFER_SIZE);
+					}
 				}
 			} catch (IOException ignored) {
 			} catch (Exception exception) {
@@ -79,7 +94,6 @@ public class VoiceChatClient {
 		ByteBuffer data = ByteBuffer.allocate(SpeakMod.UDP_PACKET_SIZE);
 		data.put((byte) 0x00);
 		data.putLong(auth);
-		SpeakMod.LOGGER.info("Auth: {}, Data: {}", auth, data.array());
 		serverSocket.send(new DatagramPacket(data.array(), SpeakMod.UDP_PACKET_SIZE, serverSocketAddress));
 	}
 

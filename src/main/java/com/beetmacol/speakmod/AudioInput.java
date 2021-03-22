@@ -3,7 +3,6 @@ package com.beetmacol.speakmod;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
@@ -17,11 +16,9 @@ public class AudioInput {
 	private final TargetDataLine input;
 
 	public AudioInput() throws LineUnavailableException {
-		AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, SpeakMod.AUDIO_FRAME_SIZE, 44100, false);
-
-		DataLine.Info inputInfo = new DataLine.Info(TargetDataLine.class, format);
+		DataLine.Info inputInfo = new DataLine.Info(TargetDataLine.class, SpeakMod.AUDIO_FORMAT);
 		input = (TargetDataLine) AudioSystem.getLine(inputInfo);
-		input.open(format, SpeakMod.AUDIO_BUFFER_SIZE);
+		input.open(SpeakMod.AUDIO_FORMAT, SpeakMod.AUDIO_BUFFER_SIZE);
 
 		listeningThread = new Thread(this::listen, "Audio Input Thread");
 		listeningThread.start();
@@ -42,7 +39,7 @@ public class AudioInput {
 					input.start();
 					input.flush();
 				}
-				input.read(buff, 0, buff.length);
+				input.read(buff, 0, SpeakMod.AUDIO_BUFFER_SIZE);
 				try {
 					SpeakModClient.voiceChatClient.sendVoicePacket(buff);
 				} catch (IOException ignored) {

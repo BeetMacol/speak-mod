@@ -11,6 +11,8 @@ import net.minecraft.world.GameRules;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.sound.sampled.AudioFormat;
+
 public class SpeakMod {
 	public static final String ID = "speak-mod";
 	public static final String VERSION = "1.0.0";
@@ -19,7 +21,8 @@ public class SpeakMod {
 	public static final int PROTOCOL_VERSION = 0;
 	public static final int AUDIO_FRAME_SIZE = 4;
 	public static final int AUDIO_BUFFER_SIZE = 1024 * AUDIO_FRAME_SIZE;
-	public static final int UDP_PACKET_SIZE = AUDIO_BUFFER_SIZE + 1;
+	public static final int UDP_PACKET_SIZE = Byte.BYTES + AUDIO_BUFFER_SIZE + Long.BYTES*2;
+	public static final AudioFormat AUDIO_FORMAT = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100, 16, 2, AUDIO_FRAME_SIZE, 44100, false);
 
 	public static final CustomGameRuleCategory VOICE_CHAT_GAME_RULE_CATEGORY = new CustomGameRuleCategory(new Identifier(ID, "voice_chat"), new TranslatableText("gamerule.category.voice_chat").styled(style -> style.withBold(true).withColor(Formatting.YELLOW)));
 	public static final GameRules.Key<GameRules.BooleanRule> REQUIRE_SPEAK_MOD_GAME_RULE = GameRuleRegistry.register("requireSpeakMod", VOICE_CHAT_GAME_RULE_CATEGORY, GameRuleFactory.createBooleanRule(false, (server, rule) -> requireSpeakMod = rule.get()));

@@ -33,6 +33,7 @@ public class SpeachIndicatorRenderer implements HudRenderCallback {
 			client.getTextureManager().bindTexture(SpeakModClient.SPEACH_INDICATOR_TEXTURE);
 			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE_MINUS_DST_COLOR, GlStateManager.DstFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 			DrawableHelper.drawTexture(matrices, x, y, 0, frame * 16, 16, 16, 16, 80);
+			RenderSystem.defaultBlendFunc();
 		}
 	}
 }
